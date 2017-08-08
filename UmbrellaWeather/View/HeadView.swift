@@ -7,6 +7,30 @@
 //
 
 import UIKit
+// FIXME: comparison operators with optionals were removed from the Swift Standard Libary.
+// Consider refactoring the code to use the non-optional operators.
+fileprivate func < <T : Comparable>(lhs: T?, rhs: T?) -> Bool {
+  switch (lhs, rhs) {
+  case let (l?, r?):
+    return l < r
+  case (nil, _?):
+    return true
+  default:
+    return false
+  }
+}
+
+// FIXME: comparison operators with optionals were removed from the Swift Standard Libary.
+// Consider refactoring the code to use the non-optional operators.
+fileprivate func <= <T : Comparable>(lhs: T?, rhs: T?) -> Bool {
+  switch (lhs, rhs) {
+  case let (l?, r?):
+    return l <= r
+  default:
+    return !(rhs < lhs)
+  }
+}
+
 
 class HeadView: UIView {
   
@@ -36,9 +60,9 @@ class HeadView: UIView {
       dateLabel.text = timeString
       remindStatus = newValue
     if newValue == true {
-      detailButton.setBackgroundImage(UIImage(named: "DetailColor"), forState: .Normal)
+      detailButton.setBackgroundImage(UIImage(named: "DetailColor"), for: UIControlState())
     } else if newValue == false {
-       detailButton.setBackgroundImage(UIImage(named: "Detail"), forState: .Normal)
+       detailButton.setBackgroundImage(UIImage(named: "Detail"), for: UIControlState())
       }
     }
   }
@@ -74,20 +98,20 @@ class HeadView: UIView {
   
   func initialTextString() {
     cityButton.titleLabel?.text = "   "
-    cityButton.setTitle("   ", forState: .Normal)
+    cityButton.setTitle("   ", for: UIControlState())
     dateLabel.text = ""
   }
   
-  func updateUI(cityName: String!) {
-    cityButton.setTitle(cityName, forState: .Normal)
+  func updateUI(_ cityName: String!) {
+    cityButton.setTitle(cityName, for: UIControlState())
     
     if dateString != nil {
       dateLabel.text = dateString
     } else {
-    let currentdate = NSDate()
-    let dateFormatter = NSDateFormatter()
+    let currentdate = Date()
+    let dateFormatter = DateFormatter()
     dateFormatter.dateFormat = "EEEE"
-    let  convertedDate = dateFormatter.stringFromDate(currentdate)
+    let  convertedDate = dateFormatter.string(from: currentdate)
     dateLabel.text = convertedDate
     dateString = convertedDate
     }

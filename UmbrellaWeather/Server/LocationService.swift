@@ -21,9 +21,9 @@ class LocationService: NSObject,CLLocationManagerDelegate{
   static let sharedManager = LocationService()
   
   enum LocationStatus{
-    case Loading
-    case Result(String)
-    case Normal
+    case loading
+    case result(String)
+    case normal
   }
   
   class func startLocation() {
@@ -33,9 +33,9 @@ class LocationService: NSObject,CLLocationManagerDelegate{
   }
   
   
-  var afterUpdatedCityAction: (Bool -> Void)?
+  var afterUpdatedCityAction: ((Bool) -> Void)?
   
-  private(set) var locationStatus: LocationStatus = .Normal
+  fileprivate(set) var locationStatus: LocationStatus = .normal
   
 
   
@@ -47,14 +47,14 @@ class LocationService: NSObject,CLLocationManagerDelegate{
     return locationManager
   }()
   
-  func locationManager(manager: CLLocationManager, didChangeAuthorizationStatus status: CLAuthorizationStatus) {
+  func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
     
-    if status == .Denied {
-      NSNotificationCenter.defaultCenter().postNotificationName("Location_Denied", object: nil)
+    if status == .denied {
+      NotificationCenter.default.post(name: Notification.Name(rawValue: "Location_Denied"), object: nil)
     }
   }
   
-  func locationManager(manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+  func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
    guard let newLocation = locations.last else{
       return
     }
@@ -63,16 +63,16 @@ class LocationService: NSObject,CLLocationManagerDelegate{
     
     geocoder.reverseGeocodeLocation(newLocation) { (placemarks, error) -> Void in
       var sucess = false
-      self.locationStatus = .Loading
+      self.locationStatus = .loading
       if error != nil{
         
-      }else if let p = placemarks where !p.isEmpty{
+      }else if let p = placemarks, !p.isEmpty{
    
         if let locality = p.last?.locality{
           self.parserXML = ParserXML()
           let cityName = self.parserXML!.rangeOfLocation(locality)
           sucess = true
-          self.locationStatus = .Result(cityName)
+          self.locationStatus = .result(cityName)
           self.parserXML = nil
         }
       }

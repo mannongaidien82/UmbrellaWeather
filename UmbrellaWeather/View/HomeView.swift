@@ -9,12 +9,12 @@
 import UIKit
 
 enum ScrollStatus {
-  case DidScroll;
-  case EndDragging;
+  case didScroll;
+  case endDragging;
 }
 
 protocol HomeViewDelegate: class {
-  func HomeViewScrollStatus(view: HomeView, status: ScrollStatus,offsety: CGFloat,showTimePicker: Bool)
+  func HomeViewScrollStatus(_ view: HomeView, status: ScrollStatus,offsety: CGFloat,showTimePicker: Bool)
 }
 
 class HomeView: UIView {
@@ -29,8 +29,8 @@ class HomeView: UIView {
   @IBOutlet weak var headView: HeadView!
   
   enum LoadingAnimation {
-    case Loading
-    case Finish
+    case loading
+    case finish
   }
   
   weak var delegate: HomeViewDelegate?
@@ -45,22 +45,22 @@ class HomeView: UIView {
     headView.timeString = time
     headView.remindStatus = remind
     if remind {
-      headView.detailButton.setBackgroundImage(UIImage(named: "DetailColor"), forState: .Normal)
+      headView.detailButton.setBackgroundImage(UIImage(named: "DetailColor"), for: UIControlState())
     }
   }
   
-  func loadingAnimationStatus(stauts:LoadingAnimation) {
+  func loadingAnimationStatus(_ stauts:LoadingAnimation) {
     switch stauts {
-    case .Loading:
+    case .loading:
       if !scorllView.weatherView.loading {
         scorllView.weatherView.loadingAnimated()
       }
-    case .Finish:
+    case .finish:
       scorllView.weatherView.loadingFinish()
     }
   }
   
-  func remindStatus(status: Bool) {
+  func remindStatus(_ status: Bool) {
     scorllView.pullDownView.shoudRemind = status
     shouldRemind = status
   }
@@ -69,12 +69,12 @@ class HomeView: UIView {
     scorllView.setContentOffset(CGPoint(x: 0, y: 0), animated: false)
   }
   
-  func headViewContext(should: Bool,timeString: String) {
+  func headViewContext(_ should: Bool,timeString: String) {
     headView.timeString = timeString
     headView.shoudRemind = should
   }
   
-  func endScroll(end: Bool) {
+  func endScroll(_ end: Bool) {
     scorllView.pullDownView.endDragging = end
     headView.endDragging = end
   }
@@ -84,7 +84,7 @@ class HomeView: UIView {
     headView.initialTextString()
   }
   
-  func updateUI(weatherResult: WeatherResult) {
+  func updateUI(_ weatherResult: WeatherResult) {
     if weatherResult.city == "" {
       return
     }
@@ -103,7 +103,7 @@ class HomeView: UIView {
 }
 
 extension HomeView: UIScrollViewDelegate {
-  func scrollViewDidScroll(scrollView: UIScrollView) {
+  func scrollViewDidScroll(_ scrollView: UIScrollView) {
     let offSety = scrollView.contentOffset.y
     showTimePicker = false
     
@@ -116,14 +116,14 @@ extension HomeView: UIScrollViewDelegate {
     
     headView.offsetY = offSety
     scorllView.didScroll(offSety)
-    delegate?.HomeViewScrollStatus(self, status: .DidScroll, offsety: offSety, showTimePicker: false)
+    delegate?.HomeViewScrollStatus(self, status: .didScroll, offsety: offSety, showTimePicker: false)
   }
   
-  func scrollViewDidEndDragging(scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+  func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
     let offSety = scrollView.contentOffset.y
     if decelerate == true {
       endScroll(decelerate)
-      delegate?.HomeViewScrollStatus(self, status: .EndDragging, offsety: offSety, showTimePicker: showTimePicker)
+      delegate?.HomeViewScrollStatus(self, status: .endDragging, offsety: offSety, showTimePicker: showTimePicker)
     }
   }
 }

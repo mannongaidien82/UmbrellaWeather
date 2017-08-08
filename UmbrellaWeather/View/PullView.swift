@@ -7,6 +7,41 @@
 //
 
 import UIKit
+// FIXME: comparison operators with optionals were removed from the Swift Standard Libary.
+// Consider refactoring the code to use the non-optional operators.
+fileprivate func < <T : Comparable>(lhs: T?, rhs: T?) -> Bool {
+  switch (lhs, rhs) {
+  case let (l?, r?):
+    return l < r
+  case (nil, _?):
+    return true
+  default:
+    return false
+  }
+}
+
+// FIXME: comparison operators with optionals were removed from the Swift Standard Libary.
+// Consider refactoring the code to use the non-optional operators.
+fileprivate func <= <T : Comparable>(lhs: T?, rhs: T?) -> Bool {
+  switch (lhs, rhs) {
+  case let (l?, r?):
+    return l <= r
+  default:
+    return !(rhs < lhs)
+  }
+}
+
+// FIXME: comparison operators with optionals were removed from the Swift Standard Libary.
+// Consider refactoring the code to use the non-optional operators.
+fileprivate func > <T : Comparable>(lhs: T?, rhs: T?) -> Bool {
+  switch (lhs, rhs) {
+  case let (l?, r?):
+    return l > r
+  default:
+    return rhs < lhs
+  }
+}
+
 
 class PullView: UIView {
   
@@ -46,7 +81,7 @@ class PullView: UIView {
       if newValue < -30 {
         lineAnimation()
         topHeightConstraion.constant = abs(newValue)
-        self.hidden = false
+        self.isHidden = false
         if newValue <= -60 && newValue > -100 {
           viewDidScroll("↓下拉设置通知", alpha: 0.04 * (abs(newValue) - 60))
           animationWithColor(self,color:UIColor.GreenBlue())
@@ -55,35 +90,35 @@ class PullView: UIView {
           }
         }
       } else {
-          if !self.hidden {
+          if !self.isHidden {
             hiddenView()
           }
         }
       }
     }
 
-  func viewDidScroll(labelText: String!,alpha: CGFloat){
-    remindLabel.hidden = false
+  func viewDidScroll(_ labelText: String!,alpha: CGFloat){
+    remindLabel.isHidden = false
     remindLabel.text = labelText
-    remindLabel.textColor = UIColor.whiteColor()
+    remindLabel.textColor = UIColor.white
     remindLabel.alpha = alpha
   }
   
   
   func lineAnimation(){
-    lineImage.hidden = false
+    lineImage.isHidden = false
     lineXConstraion.constant = self.bounds.width
-    UIView.animateWithDuration(0.5, delay: 0.0, options: UIViewAnimationOptions.CurveEaseInOut, animations: { () -> Void in
+    UIView.animate(withDuration: 0.5, delay: 0.0, options: UIViewAnimationOptions(), animations: { () -> Void in
       self.layoutIfNeeded()
       }, completion: nil)
   }
   
   
   func hiddenView(){
-    self.hidden = true
-    remindLabel.hidden = true
+    self.isHidden = true
+    remindLabel.isHidden = true
     remindLabel.alpha = 0
-    lineImage.hidden = true
+    lineImage.isHidden = true
     topHeightConstraion.constant = 0
     self.backgroundColor = UIColor.shallowBlack()
     lineXConstraion.constant -= lineImage.bounds.width

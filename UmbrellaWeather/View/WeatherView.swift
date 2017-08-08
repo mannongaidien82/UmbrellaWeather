@@ -7,6 +7,41 @@
 //
 
 import UIKit
+// FIXME: comparison operators with optionals were removed from the Swift Standard Libary.
+// Consider refactoring the code to use the non-optional operators.
+fileprivate func < <T : Comparable>(lhs: T?, rhs: T?) -> Bool {
+  switch (lhs, rhs) {
+  case let (l?, r?):
+    return l < r
+  case (nil, _?):
+    return true
+  default:
+    return false
+  }
+}
+
+// FIXME: comparison operators with optionals were removed from the Swift Standard Libary.
+// Consider refactoring the code to use the non-optional operators.
+fileprivate func >= <T : Comparable>(lhs: T?, rhs: T?) -> Bool {
+  switch (lhs, rhs) {
+  case let (l?, r?):
+    return l >= r
+  default:
+    return !(lhs < rhs)
+  }
+}
+
+// FIXME: comparison operators with optionals were removed from the Swift Standard Libary.
+// Consider refactoring the code to use the non-optional operators.
+fileprivate func <= <T : Comparable>(lhs: T?, rhs: T?) -> Bool {
+  switch (lhs, rhs) {
+  case let (l?, r?):
+    return l <= r
+  default:
+    return !(rhs < lhs)
+  }
+}
+
 
 class WeatherView: UIView {
 
@@ -34,7 +69,7 @@ class WeatherView: UIView {
   }
   
   
-  func updateAndAnimation(weatherResult: WeatherResult){
+  func updateAndAnimation(_ weatherResult: WeatherResult){
     animation() 
     schemaLabel.text = weatherResult.state
     weatherImage.imageWithCode(weatherResult.stateCode)
@@ -68,28 +103,28 @@ class WeatherView: UIView {
     maxLabelConstraint.constant = 25
     minLabelConstraint.constant = 25
     percentConstraint.constant = 10
-    weatherImage.hidden = true
-    weatherImage.transform = CGAffineTransformMakeScale(0.7, 0.7)
+    weatherImage.isHidden = true
+    weatherImage.transform = CGAffineTransform(scaleX: 0.7, y: 0.7)
     schemaLabel.text = ""
     tmpMaxLabel.text = ""
     tmpMinLabel.text = ""
     rainPercentLabel.text = ""
   }
   
-  private func animation(){
-    UIView.animateWithDuration(0.66, delay: 0.0, usingSpringWithDamping: 0.5, initialSpringVelocity: 0.0, options: .CurveEaseInOut, animations: { () -> Void in
-      self.weatherImage.hidden = false
-      self.weatherImage.transform = CGAffineTransformMakeScale(1.0, 1.0)
+  fileprivate func animation(){
+    UIView.animate(withDuration: 0.66, delay: 0.0, usingSpringWithDamping: 0.5, initialSpringVelocity: 0.0, options: UIViewAnimationOptions(), animations: { () -> Void in
+      self.weatherImage.isHidden = false
+      self.weatherImage.transform = CGAffineTransform(scaleX: 1.0, y: 1.0)
       }, completion: nil)
     self.maxLabelConstraint.constant = 5
-    UIView.animateWithDuration(0.66, delay: 0.0, options: .CurveEaseInOut, animations: { () -> Void in
+    UIView.animate(withDuration: 0.66, delay: 0.0, options: UIViewAnimationOptions(), animations: { () -> Void in
       self.layoutIfNeeded()
       }, completion: nil)
-    UIView.animateWithDuration(0.66, delay: 0.2, options: .CurveEaseInOut, animations: { () -> Void in
+    UIView.animate(withDuration: 0.66, delay: 0.2, options: UIViewAnimationOptions(), animations: { () -> Void in
       self.minLabelConstraint.constant = 5
       self.layoutIfNeeded()
       }, completion: nil)
-    UIView.animateWithDuration(0.66, delay: 0.2, options: .CurveEaseInOut, animations: { () -> Void in
+    UIView.animate(withDuration: 0.66, delay: 0.2, options: UIViewAnimationOptions(), animations: { () -> Void in
       self.percentConstraint.constant = 30
       self.layoutIfNeeded()
       }, completion: nil)

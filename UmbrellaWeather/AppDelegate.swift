@@ -14,44 +14,44 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
   var window: UIWindow?
   var dataModel = DataModel()
   
-  func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
+  func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
     
     let controller = self.window?.rootViewController as! HomeViewController
     controller.dataModel = dataModel
    
-   UIApplication.sharedApplication().setMinimumBackgroundFetchInterval(NSTimeInterval(3600 * 12))
+   UIApplication.shared.setMinimumBackgroundFetchInterval(TimeInterval(3600 * 12))
   
     return true
   }
   
-  func application(application: UIApplication, performFetchWithCompletionHandler completionHandler: (UIBackgroundFetchResult) -> Void) {
+  func application(_ application: UIApplication, performFetchWithCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
     let serviceResult = ServiceResult()
     serviceResult.fetchDailyResults(dataModel.currentCity) { [weak self] dailyResults  in
       self?.dataModel.weatherResult.dailyResults = dailyResults
       self?.dataModel.saveData()
-      completionHandler(.NewData)
+      completionHandler(.newData)
     }
   }
 
-  func applicationWillResignActive(application: UIApplication) {
+  func applicationWillResignActive(_ application: UIApplication) {
   }
 
-  func applicationDidEnterBackground(application: UIApplication) {
+  func applicationDidEnterBackground(_ application: UIApplication) {
     saveData()
   }
 
-  func applicationWillEnterForeground(application: UIApplication) {
+  func applicationWillEnterForeground(_ application: UIApplication) {
     let serviceResult = ServiceResult()
     serviceResult.fetchDailyResults(dataModel.currentCity) { [weak self] dailyResults  in
       self?.dataModel.weatherResult.dailyResults = dailyResults
     }
   }
 
-  func applicationDidBecomeActive(application: UIApplication) {
+  func applicationDidBecomeActive(_ application: UIApplication) {
     
   }
 
-  func applicationWillTerminate(application: UIApplication) {
+  func applicationWillTerminate(_ application: UIApplication) {
     saveData()
   }
   

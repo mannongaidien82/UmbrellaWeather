@@ -33,7 +33,7 @@ class HomeViewController: UIViewController,TimePickerViewControllerDelegate,Supp
     listenForLocation()
   }
   
-  override func viewDidDisappear(animated: Bool) {
+  override func viewDidDisappear(_ animated: Bool) {
     homeView.initialUI()
   }
   
@@ -61,13 +61,13 @@ class HomeViewController: UIViewController,TimePickerViewControllerDelegate,Supp
   }
   
   func listenForLocation() {
-    observer = NSNotificationCenter.defaultCenter().addObserverForName("Location_Denied", object: nil, queue: NSOperationQueue.mainQueue(), usingBlock: { [weak self](_) in
+    observer = NotificationCenter.default.addObserver(forName: NSNotification.Name(rawValue: "Location_Denied"), object: nil, queue: OperationQueue.main, using: { [weak self](_) in
       self?.showAlert("没有打开定位服务请在设置中打开定位或上拉搜索选择城市", "好的", againReuqest:  false, shouldRemind: false)
       })
   }
   
   deinit {
-    NSNotificationCenter.defaultCenter().removeObserver(observer)
+    NotificationCenter.default.removeObserver(observer)
   }
   
   func locationCity(){
@@ -75,7 +75,7 @@ class HomeViewController: UIViewController,TimePickerViewControllerDelegate,Supp
     LocationService.sharedManager.afterUpdatedCityAction = {
       [weak self] sucess in
       if !sucess{
-        self?.homeView.loadingAnimationStatus(.Finish)
+        self?.homeView.loadingAnimationStatus(.finish)
         let message = "定位失败,请稍后重试或上滑视图打开城市搜索"
         self?.showAlert(message, "好的", againReuqest: false, shouldRemind: false)
       }
@@ -87,12 +87,12 @@ class HomeViewController: UIViewController,TimePickerViewControllerDelegate,Supp
   
   func showLocationStatus(){
     switch LocationService.sharedManager.locationStatus{
-    case .Loading:
-      homeView.loadingAnimationStatus(.Loading)
-    case .Result(let city):
+    case .loading:
+      homeView.loadingAnimationStatus(.loading)
+    case .result(let city):
         dataModel.currentCity = city
         perforRequest()
-    case .Normal:
+    case .normal:
       return
     }
   }
@@ -101,7 +101,7 @@ class HomeViewController: UIViewController,TimePickerViewControllerDelegate,Supp
       serviceResult.performResult(dataModel.currentCity) { success in
         print("网络请求")
         if !success{
-          self.homeView.loadingAnimationStatus(.Finish)
+          self.homeView.loadingAnimationStatus(.finish)
           let message = "网络请求出现错误,请稍后重试"
           self.showAlert(message,"取消", againReuqest: true,shouldRemind: false)
         }
@@ -112,23 +112,23 @@ class HomeViewController: UIViewController,TimePickerViewControllerDelegate,Supp
   
   func showRequestStatus(){
     switch serviceResult.state{
-    case .Loading:
-      homeView.loadingAnimationStatus(.Loading)
-    case .Results(let result):
+    case .loading:
+      homeView.loadingAnimationStatus(.loading)
+    case .results(let result):
       dataModel.weatherResult = result
       updateUI()
-      homeView.loadingAnimationStatus(.Finish)
-    case .NoRequest:
+      homeView.loadingAnimationStatus(.finish)
+    case .noRequest:
       let message = "今天服务器请求已经超过访问次数,请明天再试"
       showAlert(message,"好的", againReuqest: false,shouldRemind: false)
-      homeView.loadingAnimationStatus(.Finish)
-    case .NonsupportCity:
+      homeView.loadingAnimationStatus(.finish)
+    case .nonsupportCity:
       dataModel.currentCity = ""
       let message = "很抱歉,服务器暂不支持此城市,请在城市搜索界面查找其他城市"
       showAlert(message, "好的", againReuqest: false, shouldRemind: false)
-      homeView.loadingAnimationStatus(.Finish)
+      homeView.loadingAnimationStatus(.finish)
       break
-    case .NoYet:
+    case .noYet:
       return
     }
   }
@@ -140,13 +140,13 @@ class HomeViewController: UIViewController,TimePickerViewControllerDelegate,Supp
   
   //设置第一次启动引导
   func handleFirstTime(){
-    let userDefaults = NSUserDefaults.standardUserDefaults()
-    let firstTime = userDefaults.boolForKey("FirstTime")
+    let userDefaults = UserDefaults.standard
+    let firstTime = userDefaults.bool(forKey: "FirstTime")
     if firstTime{
       let firstView = FirstView.showView(self.view)
-      firstView.doneButton.addTarget(self, action: #selector(touchBegin), forControlEvents: .TouchUpInside)
+      firstView.doneButton.addTarget(self, action: #selector(touchBegin), for: .touchUpInside)
       firstView.tag = 1000;
-      userDefaults.setBool(false, forKey: "FirstTime")
+      userDefaults.set(false, forKey: "FirstTime")
       userDefaults.synchronize()
     }else{
       updateWeatherResult()
@@ -158,16 +158,16 @@ class HomeViewController: UIViewController,TimePickerViewControllerDelegate,Supp
     updateWeatherResult()
   }
   
-  func showAlert(message: String, _ actionTitle: String,againReuqest: Bool,shouldRemind: Bool){
+  func showAlert(_ message: String, _ actionTitle: String,againReuqest: Bool,shouldRemind: Bool){
     
     let alertTitle = shouldRemind ? "确定取消天气通知吗?" : "发生错误"
-    let alertStyle = shouldRemind ? UIAlertControllerStyle.ActionSheet : .Alert
+    let alertStyle = shouldRemind ? UIAlertControllerStyle.actionSheet : .alert
     let actionDoneTitle = shouldRemind ? "取消通知" : "重试"
     
     let alert = UIAlertController(title: alertTitle, message: message , preferredStyle: alertStyle)
     
     if againReuqest || shouldRemind{
-      let actionRequest = UIAlertAction(title: actionDoneTitle, style: .Default, handler: { (action) -> Void in
+      let actionRequest = UIAlertAction(title: actionDoneTitle, style: .default, handler: { (action) -> Void in
         if shouldRemind{
           
           self.shoudldNotification(false)
@@ -178,22 +178,22 @@ class HomeViewController: UIViewController,TimePickerViewControllerDelegate,Supp
       alert.addAction(actionRequest)
     }
     
-    let actionCancel = UIAlertAction(title: actionTitle, style: .Default, handler: {(_) in
+    let actionCancel = UIAlertAction(title: actionTitle, style: .default, handler: {(_) in
       self.updateUI()
     })
     
     alert.addAction(actionCancel)
     
-    presentViewController(alert, animated: true, completion: nil)
+    present(alert, animated: true, completion: nil)
   }
  
-  func shoudldNotification(should: Bool){
+  func shoudldNotification(_ should: Bool){
     
     dataModel.shouldRemind = should
     if should{
       playSoundEffect()
-      let notificationSettings = UIUserNotificationSettings(forTypes: [.Alert, .Sound], categories: nil)
-      UIApplication.sharedApplication().registerUserNotificationSettings(notificationSettings)
+      let notificationSettings = UIUserNotificationSettings(types: [.alert, .sound], categories: nil)
+      UIApplication.shared.registerUserNotificationSettings(notificationSettings)
     }else{
       self.dataModel.dueString = "__ : __"
     }
@@ -201,10 +201,10 @@ class HomeViewController: UIViewController,TimePickerViewControllerDelegate,Supp
   }
   
   // MARK: - Sound Effect
-  func loadSoundEffect(name: String){
-    if let path = NSBundle.mainBundle().pathForResource(name, ofType: nil){
-      let fileURL = NSURL.fileURLWithPath(path, isDirectory: false)
-      let error = AudioServicesCreateSystemSoundID(fileURL, &soundID)
+  func loadSoundEffect(_ name: String){
+    if let path = Bundle.main.path(forResource: name, ofType: nil){
+      let fileURL = URL(fileURLWithPath: path, isDirectory: false)
+      let error = AudioServicesCreateSystemSoundID(fileURL as CFURL, &soundID)
       if error != kAudioServicesNoError{
         print("Sound Error: \(error), path: \(path)")
       }
@@ -220,74 +220,74 @@ class HomeViewController: UIViewController,TimePickerViewControllerDelegate,Supp
     AudioServicesPlaySystemSound(soundID)
   }
   
-  func timePickerViewControllerDidSelect(controller: TimePickerViewController, didSelectTime time: String) {
+  func timePickerViewControllerDidSelect(_ controller: TimePickerViewController, didSelectTime time: String) {
     dataModel.dueString = time
     shoudldNotification(true)
-    dismissViewControllerAnimated(true, completion: nil)
+    dismiss(animated: true, completion: nil)
   }
   
-  func timePickerViewControllerDidCancel(controller: TimePickerViewController) {
-    dismissViewControllerAnimated(true, completion: nil)
+  func timePickerViewControllerDidCancel(_ controller: TimePickerViewController) {
+    dismiss(animated: true, completion: nil)
   }
   
-  func supportTableViewController(controller: SupportTableViewController) {
+  func supportTableViewController(_ controller: SupportTableViewController) {
     homeView.initialScrollViewOffset()
-    self.performSelector(#selector(HomeViewController.updateUI), withObject: nil, afterDelay: 0.3)
-    dismissViewControllerAnimated(true, completion: nil)
+    self.perform(#selector(HomeViewController.updateUI), with: nil, afterDelay: 0.3)
+    dismiss(animated: true, completion: nil)
   }
   
-  func cityListViewControolerDidSelectCity(controller: CityListViewController, didSelectCity city: City) {
+  func cityListViewControolerDidSelectCity(_ controller: CityListViewController, didSelectCity city: City) {
     
     //减少网络请求次数,相同城市只有动画效果不重新加载网络请求
     if dataModel.currentCity == city.cityCN{
-      self.performSelector(#selector(HomeViewController.updateUI), withObject: nil, afterDelay: 0.3)
+      self.perform(#selector(HomeViewController.updateUI), with: nil, afterDelay: 0.3)
     }else{
       dataModel.currentCity = city.cityCN
       updateWeatherResult()
     }
     dataModel.appendCity(city)
     homeView.initialScrollViewOffset()
-    dismissViewControllerAnimated(true, completion: nil)
+    dismiss(animated: true, completion: nil)
   }
   
-  func cityListViewControllerDeleteCity(controller: CityListViewController, currentCities cities: [City]){
+  func cityListViewControllerDeleteCity(_ controller: CityListViewController, currentCities cities: [City]){
     dataModel.cities = cities
   }
   
-  func cityListViewControllerCancel(controller: CityListViewController) {
+  func cityListViewControllerCancel(_ controller: CityListViewController) {
     homeView.initialScrollViewOffset()
-    self.performSelector(#selector(HomeViewController.updateUI), withObject: nil, afterDelay: 0.3)
-    dismissViewControllerAnimated(true, completion: nil)
+    self.perform(#selector(HomeViewController.updateUI), with: nil, afterDelay: 0.3)
+    dismiss(animated: true, completion: nil)
   }
   
-  func HomeViewScrollStatus(view: HomeView, status: ScrollStatus, offsety: CGFloat, showTimePicker: Bool) {
+  func HomeViewScrollStatus(_ view: HomeView, status: ScrollStatus, offsety: CGFloat, showTimePicker: Bool) {
     switch status {
-    case .DidScroll:
+    case .didScroll:
       homeView.remindStatus(dataModel.shouldRemind)
-    case .EndDragging:
+    case .endDragging:
       if showTimePicker {
-        performSegueWithIdentifier("TimePicker", sender: self)
+        performSegue(withIdentifier: "TimePicker", sender: self)
       }
       if offsety <= -100 && !showTimePicker{
         showAlert("","不取消", againReuqest: false, shouldRemind: true)
       }
       if offsety >= 260{
-        performSegueWithIdentifier("CityList", sender: self)
+        performSegue(withIdentifier: "CityList", sender: self)
       }
     }
   }
   
-  override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+  override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
     if segue.identifier == "TimePicker"{
-      let controller = segue.destinationViewController as! TimePickerViewController
+      let controller = segue.destination as! TimePickerViewController
       controller.delegate = self
     }
     if segue.identifier == "SupportView"{
-     let controller = segue.destinationViewController as! SupportTableViewController
+     let controller = segue.destination as! SupportTableViewController
       controller.delegate = self
     }
     if segue.identifier == "CityList"{
-      let controller = segue.destinationViewController as! CityListViewController
+      let controller = segue.destination as! CityListViewController
       controller.delegate = self
       controller.cities = dataModel.cities
     }
@@ -296,12 +296,12 @@ class HomeViewController: UIViewController,TimePickerViewControllerDelegate,Supp
 
 
 extension HomeViewController: UICollectionViewDataSource{
-  func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+  func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
     return dataModel.weatherResult.dailyResults.count
   }
   
-  func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
-    let cell = collectionView.dequeueReusableCellWithReuseIdentifier("WeekWeatherCell", forIndexPath: indexPath) as! WeekWeatherCell
+  func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+    let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "WeekWeatherCell", for: indexPath) as! WeekWeatherCell
     
     let dailyResult = dataModel.weatherResult.dailyResults[indexPath.item]
     cell.configureForDailyResult(dailyResult)

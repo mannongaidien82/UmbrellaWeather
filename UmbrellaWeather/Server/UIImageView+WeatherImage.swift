@@ -9,7 +9,7 @@
 import UIKit
 
 extension UIImageView{
-  func imageWithCode(code: Int){
+  func imageWithCode(_ code: Int){
     if code == 100{
       self.image = UIImage(named: "Sun")
     }else if code >= 101 && code <= 213{
@@ -26,8 +26,8 @@ extension UIImageView{
   }
   
   func imageWithResolution(){
-    let screenheight = UIScreen.mainScreen().bounds.size.height
-    let scale = UIScreen.mainScreen().scale
+    let screenheight = UIScreen.main.bounds.size.height
+    let scale = UIScreen.main.scale
     let heightRes = screenheight * scale
     switch heightRes{
     case 960.0:

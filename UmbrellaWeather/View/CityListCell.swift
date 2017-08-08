@@ -12,7 +12,7 @@ class CityListCell: UITableViewCell{
   
   @IBOutlet weak var cityLabel: UILabel!
   
-  func addCityName(city: City){
+  func addCityName(_ city: City){
     cityLabel.text = city.cityCN
   }
   

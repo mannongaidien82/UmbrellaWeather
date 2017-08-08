@@ -1,5 +1,7 @@
-platform :ios, '8.0'
-
-pod 'SwiftyJSON', '~> 2.3.2'
+platform :ios, '9.0'
 use_frameworks!
+
+target 'UmbrellaWeather' do
+    pod 'SwiftyJSON'
+end
 

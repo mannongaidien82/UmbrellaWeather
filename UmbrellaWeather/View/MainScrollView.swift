@@ -21,7 +21,7 @@ class MainScrollView: UIScrollView {
   @IBOutlet weak var pullDownView: PullView!
   
   
-  func didScroll(offsetY: CGFloat) {
+  func didScroll(_ offsetY: CGFloat) {
     pullDownView.offsetY = offsetY
     weatherView.offsetY = offsetY
   }

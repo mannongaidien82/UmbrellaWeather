@@ -20,7 +20,7 @@ class WeekWeatherCell: UICollectionViewCell{
     super.awakeFromNib()
   }
   
-  func configureForDailyResult(dailyResult: DailyResult){
+  func configureForDailyResult(_ dailyResult: DailyResult){
     dateLabel.text = dailyResult.dailyDate
     schemaLabel.text = dailyResult.dailyState
     tmpMaxLabel.text = dailyResult.dailyTmpMax + " /"

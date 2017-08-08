@@ -14,59 +14,59 @@ typealias ResultComplete = (Bool) -> Void
 class ServiceResult {
   
   enum State{
-    case Loading
-    case NoRequest
-    case NonsupportCity
-    case NoYet
-    case Results(WeatherResult)
+    case loading
+    case noRequest
+    case nonsupportCity
+    case noYet
+    case results(WeatherResult)
   }
   
  
-  private(set) var state: State = .NoYet
-  private var dataTask: NSURLSessionDataTask? = nil
+  fileprivate(set) var state: State = .noYet
+  fileprivate var dataTask: URLSessionDataTask? = nil
   
-  func performResult(cityName: String,completion: ResultComplete){
+  func performResult(_ cityName: String,completion: @escaping ResultComplete){
     if !cityName.isEmpty{
       
       dataTask?.cancel()
-      state = .Loading
+      state = .loading
       
     let url = citySearchText(cityName)
-    let session = NSURLSession.sharedSession()
-    dataTask = session.dataTaskWithURL(url) { (data, response, error) -> Void in
+    let session = URLSession.shared
+    dataTask = session.dataTask(with: url, completionHandler: { (data, response, error) -> Void in
       var success = false
-      if error != nil && error?.code == -999{
-        print(error)
+        if error != nil {//&& error?.code == -999{
+        print(error ?? "error nil")
         return
       }
-      if let httpResponse = response as? NSHTTPURLResponse where httpResponse.statusCode == 200 ,let data = data{
+      if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 ,let data = data{
         success = true
         let dictionary = self.parseJSON(data)
         let weatherResult = self.parseDictionary(dictionary)
         if weatherResult.ServiceStatus == "no more requests"{
-          self.state = .NoRequest
+          self.state = .noRequest
         }else if weatherResult.ServiceStatus == "unknown city"{
-          self.state = .NonsupportCity
+          self.state = .nonsupportCity
         }else{
-        self.state = .Results(weatherResult)
+        self.state = .results(weatherResult)
         }
         
       }
-      dispatch_async(dispatch_get_main_queue(), {
+      DispatchQueue.main.async(execute: {
         completion(success)
       })
-    }
+    }) 
     dataTask?.resume()
     }
   }
   
-  func fetchDailyResults(cityName: String,completion: ([DailyResult] -> Void)?){
+  func fetchDailyResults(_ cityName: String,completion: (([DailyResult]) -> Void)?){
     
     if !cityName.isEmpty{
       
       let url = citySearchText(cityName)
-      let session = NSURLSession.sharedSession()
-      let dateTask = session.dataTaskWithURL(url) { (data, response, error)
+      let session = URLSession.shared
+      let dateTask = session.dataTask(with: url, completionHandler: { (data, response, error)
         in
         if error != nil{
           return
@@ -76,30 +76,31 @@ class ServiceResult {
           let dailyResults =  self.parseWithDairyResults(dictionary)
           completion?(dailyResults)
         }
-      }
+      }) 
       dateTask.resume()
     }
   }
   
   
-  private func citySearchText(searchText: String) -> NSURL{
+  fileprivate func citySearchText(_ searchText: String) -> URL{
     
     //api 每天免费请求次数3000,如果超过请求次数请自行注册
     //和风天气网址: http://www.heweather.com
+    //mykey 
+    let apiKeyTest = "7cded2970e40453dbb083cd3f38facc0"
+    //let apiKeyTest = "cf386feb168149f4a45eb87d4f4b647f"
     
-    let apiKeyTest = "cf386feb168149f4a45eb87d4f4b647f"
-    
-    let escapedSearchText = searchText.stringByAddingPercentEncodingWithAllowedCharacters(NSCharacterSet.URLQueryAllowedCharacterSet())!
+    let escapedSearchText = searchText.addingPercentEncoding(withAllowedCharacters: CharacterSet.urlQueryAllowed)!
     let urlString = String(format: "https://api.heweather.com/x3/weather?city=%@&key="+apiKeyTest,escapedSearchText)
-    let url = NSURL(string: urlString)
+    let url = URL(string: urlString)
     return url!
   }
   
-  private func parseJSON(data: NSData) -> JSON{
+  fileprivate func parseJSON(_ data: Data) -> JSON{
     return JSON(data: data)
   }
   
-  private func parseDictionary(dictionary: JSON) -> WeatherResult{
+  fileprivate func parseDictionary(_ dictionary: JSON) -> WeatherResult{
     let weatherResult = WeatherResult()
     let json = dictionary["HeWeather data service 3.0"][0]
     if let ServiceState = json["status"].string{
@@ -154,7 +155,7 @@ class ServiceResult {
     return weatherResult
   }
   
-  private func parseWithDairyResults(dictionary: JSON) -> [DailyResult]{
+  fileprivate func parseWithDairyResults(_ dictionary: JSON) -> [DailyResult]{
     var dailyResults = [DailyResult]()
     let json = dictionary["HeWeather data service 3.0"][0]
     for (_,subJson):(String, JSON) in json["daily_forecast"]{
